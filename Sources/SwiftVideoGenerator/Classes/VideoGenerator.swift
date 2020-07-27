@@ -59,11 +59,7 @@ public class VideoGenerator: NSObject {
   public static var videoImageWidthForMultipleVideoGeneration = 800
   
   /// public property to set the video duration when there is no audio
-  public static var videoDurationInSeconds: Double = 0 {
-    didSet {
-      videoDurationInSeconds = videoDurationInSeconds//Double(CMTime(seconds: videoDurationInSeconds, preferredTimescale: 1).seconds)
-    }
-  }
+  public static var videoDurationInSeconds: Double = 0
   
   // MARK: - Public methods
   
@@ -155,13 +151,13 @@ public class VideoGenerator: NSObject {
               var elapsedTime: Double = 0
               
               /// calculate the frame duration by dividing the full video duration by the number of images and rounding up the number
-              let frameDuration = CMTime(seconds: ceil(Double(VideoGenerator.current.duration / Double(VideoGenerator.current.images.count))), preferredTimescale: 1)
+              let frameDuration = CMTime(seconds: ceil(Double(VideoGenerator.current.duration / Double(VideoGenerator.current.images.count))), preferredTimescale: 1000)
               let currentProgress = Progress(totalUnitCount: Int64(VideoGenerator.current.images.count))
               
               /// declare a temporary array to hold all as of yet unused images
               var remainingPhotos = [UIImage](VideoGenerator.current.images)
               
-              var nextStartTimeForFrame: CMTime! = CMTime(seconds: 0, preferredTimescale: 1)
+              var nextStartTimeForFrame: CMTime! = CMTime(seconds: 0, preferredTimescale: 1000)
               var imageForVideo: UIImage!
               
               /// if the input writer is ready and we have not yet used all imaged
@@ -172,14 +168,14 @@ public class VideoGenerator: NSObject {
                   imageForVideo = remainingPhotos.remove(at: 0)
                   
                   /// calculate the beggining time of the next frame; if the frame is the first, the start time is 0, if not, the time is the number of the frame multiplied by the frame duration in seconds
-                  nextStartTimeForFrame = frameCount == 0 ? CMTime(seconds: 0, preferredTimescale: 1) : CMTime(seconds: Double(frameCount) * frameDuration.seconds, preferredTimescale: 1)
+                  nextStartTimeForFrame = frameCount == 0 ? CMTime(seconds: 0, preferredTimescale: 1000) : CMTime(seconds: Double(frameCount) * frameDuration.seconds, preferredTimescale: 1000)
                 } else {
                   /// get the right photo from the array
                   imageForVideo = VideoGenerator.current.images[frameCount]
                   
                   if VideoGenerator.current.type == .multiple {
                     /// calculate the start of the frame; if the frame is the first, the start time is 0, if not, get the already elapsed time
-                    nextStartTimeForFrame = frameCount == 0 ? CMTime(seconds: 0, preferredTimescale: 1) : CMTime(seconds: Double(elapsedTime), preferredTimescale: 1)
+                    nextStartTimeForFrame = frameCount == 0 ? CMTime(seconds: 0, preferredTimescale: 1000) : CMTime(seconds: Double(elapsedTime), preferredTimescale: 1000)
                     
                     /// add the max between the audio duration time or a minimum duration to the elapsed time
                     elapsedTime += VideoGenerator.current.audioDurations[frameCount] <= 1 ? VideoGenerator.current.minSingleVideoDuration : VideoGenerator.current.audioDurations[frameCount]
@@ -213,7 +209,7 @@ public class VideoGenerator: NSObject {
               videoWriterInput.markAsFinished()
               
               if let _maxLength = VideoGenerator.maxVideoLengthInSeconds {
-                videoWriter.endSession(atSourceTime: CMTime(seconds: _maxLength, preferredTimescale: 1))
+                videoWriter.endSession(atSourceTime: CMTime(seconds: _maxLength, preferredTimescale: 1000))
               }
               
               // the completion is made with a completion handler which will return the url of the generated video or an error
@@ -319,13 +315,13 @@ public class VideoGenerator: NSObject {
       /// add audio and video tracks to the composition
       if let videoTrack: AVMutableCompositionTrack = composition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID: kCMPersistentTrackID_Invalid), let audioTrack: AVMutableCompositionTrack = composition.addMutableTrack(withMediaType: AVMediaType.audio, preferredTrackID: kCMPersistentTrackID_Invalid) {
         
-        var insertTime = CMTime(seconds: 0, preferredTimescale: 1)
+        var insertTime = CMTime(seconds: 0, preferredTimescale: 1000)
         
         /// for each URL add the video and audio tracks and their duration to the composition
         for sourceAsset in videoAssets {
           do {
             if let assetVideoTrack = sourceAsset.tracks(withMediaType: .video).first, let assetAudioTrack = sourceAsset.tracks(withMediaType: .audio).first {
-              let frameRange = CMTimeRange(start: CMTime(seconds: 0, preferredTimescale: 1), duration: sourceAsset.duration)
+              let frameRange = CMTimeRange(start: CMTime(seconds: 0, preferredTimescale: 1000), duration: sourceAsset.duration)
               try videoTrack.insertTimeRange(frameRange, of: assetVideoTrack, at: insertTime)
               try audioTrack.insertTimeRange(frameRange, of: assetAudioTrack, at: insertTime)
               
@@ -646,7 +642,7 @@ public class VideoGenerator: NSObject {
       }
     }
     
-    let minVideoDuration = Double(CMTime(seconds: minSingleVideoDuration, preferredTimescale: 1).seconds)
+    let minVideoDuration = Double(CMTime(seconds: minSingleVideoDuration, preferredTimescale: 1000).seconds)
     duration = max((audioURLs.isEmpty ? VideoGenerator.videoDurationInSeconds : _duration), minVideoDuration)
     
     if audioURLs.isEmpty {
@@ -722,14 +718,14 @@ public class VideoGenerator: NSObject {
           outcome(.failure(error))
         }
         
-        var duration = CMTime(seconds: 0, preferredTimescale: 1)
+        var duration = CMTime(seconds: 0, preferredTimescale: 1000)
         
         /// add an audio track to the composition
         let audioCompositon = mixComposition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
         
         /// for all audio files add the audio track and duration to the existing audio composition
         for (index, audioUrl) in self?.audioURLs.enumerated() ?? [].enumerated() {
-          let audioDuration = CMTime(seconds: self?.audioDurations[index] ?? 0.0, preferredTimescale: 1)
+          let audioDuration = CMTime(seconds: self?.audioDurations[index] ?? 0.0, preferredTimescale: 1000)
           
           let audioAsset = AVURLAsset(url: audioUrl)
           let audioTimeRange = CMTimeRange(start: CMTime.zero, duration: VideoGenerator.maxVideoLengthInSeconds != nil ? audioDuration : audioAsset.duration)
