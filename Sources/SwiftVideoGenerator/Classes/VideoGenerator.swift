@@ -814,7 +814,7 @@ public class VideoGenerator: NSObject {
         
         if let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first {
           /// create a path to the video file
-          completeMoviePath = URL(fileURLWithPath: documentsPath).appendingPathComponent(_fileName))
+          completeMoviePath = URL(fileURLWithPath: documentsPath).appendingPathComponent(_fileName)
           
           if let completeMoviePath = completeMoviePath {
             if FileManager.default.fileExists(atPath: completeMoviePath.path) {
