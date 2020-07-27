@@ -91,7 +91,7 @@ public class VideoGenerator: NSObject {
       self?.getTempVideoFileUrl { (videoOutputURL) in
         do {
           /// try to create an asset writer for videos pointing to the video url
-          try VideoGenerator.current.videoWriter = AVAssetWriter(outputURL: videoOutputURL, fileType: AVFileType.mp4)
+          try VideoGenerator.current.videoWriter = AVAssetWriter(outputURL: videoOutputURL, fileType: AVFileType.mov)
         } catch {
           VideoGenerator.current.videoWriter = nil
           DispatchQueue.main.async {
@@ -308,6 +308,7 @@ public class VideoGenerator: NSObject {
       }
     }
     
+    
     let composition = AVMutableComposition()
     
     if let completeMoviePath = completeMoviePath {
@@ -317,8 +318,10 @@ public class VideoGenerator: NSObject {
         
         var insertTime = CMTime(seconds: 0, preferredTimescale: 1000)
         
+        
         /// for each URL add the video and audio tracks and their duration to the composition
         for sourceAsset in videoAssets {
+          
           do {
             if let assetVideoTrack = sourceAsset.tracks(withMediaType: .video).first, let assetAudioTrack = sourceAsset.tracks(withMediaType: .audio).first {
               let frameRange = CMTimeRange(start: CMTime(seconds: 0, preferredTimescale: 1000), duration: sourceAsset.duration)
