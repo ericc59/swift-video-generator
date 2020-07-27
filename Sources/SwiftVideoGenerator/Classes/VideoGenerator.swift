@@ -339,7 +339,7 @@ public class VideoGenerator: NSObject {
         /// try to start an export session and set the path and file type
         if let exportSession = AVAssetExportSession(asset: composition, presetName: presetName ?? AVAssetExportPresetHighestQuality) {
           exportSession.outputURL = completeMoviePath
-          exportSession.outputFileType = AVFileType.mp4
+          exportSession.outputFileType = AVFileType.mov
           exportSession.shouldOptimizeForNetworkUse = true
           
           /// try to export the file and handle the status cases
@@ -501,8 +501,8 @@ public class VideoGenerator: NSObject {
     }
     
     let mutableVideoComposition: AVMutableVideoComposition = AVMutableVideoComposition()
-    mutableVideoComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
-    mutableVideoComposition.renderSize = CGSize(width: 1280, height: 720)
+    mutableVideoComposition.frameDuration = CMTimeMake(value: 1, timescale: 24)
+    mutableVideoComposition.renderSize = CGSize(width: 1920, height: 1080)
     
     if let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first {
       let outputURL = URL(fileURLWithPath: documentsPath).appendingPathComponent(VideoGenerator.fileName)
@@ -517,7 +517,7 @@ public class VideoGenerator: NSObject {
       
       if let exportSession = AVAssetExportSession(asset: mixComposition, presetName: VideoGenerator.presetName ?? AVAssetExportPresetHighestQuality) {
         exportSession.outputURL = outputURL
-        exportSession.outputFileType = AVFileType.mp4
+        exportSession.outputFileType = AVFileType.mov
         exportSession.shouldOptimizeForNetworkUse = true
         
         /// try to export the file and handle the status cases
